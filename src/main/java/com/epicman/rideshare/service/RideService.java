@@ -25,6 +25,7 @@ public class RideService {
         ride.setPickupLocation(dto.getPickupLocation());
         ride.setDropLocation(dto.getDropLocation());
         ride.setStatus("REQUESTED");
+        ride.setFare(dto.getFare());
 
         return rideRepository.save(ride);
     }

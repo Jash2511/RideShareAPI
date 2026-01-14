@@ -17,18 +17,21 @@ public class RideModel {
     private String status;        // REQUESTED / ACCEPTED / COMPLETED
     private Date createdAt;
 
+    private double fare;
+
     // Constructors
     public RideModel() {
         this.createdAt = new Date();
         this.status = "REQUESTED";
     }
 
-    public RideModel(String userId, String pickupLocation, String dropLocation) {
+    public RideModel(String userId, String pickupLocation, String dropLocation, double fare) {
         this.userId = userId;
         this.pickupLocation = pickupLocation;
         this.dropLocation = dropLocation;
         this.status = "REQUESTED";
         this.createdAt = new Date();
+        this.fare = fare;
     }
 
     // Getters and Setters
@@ -52,4 +55,12 @@ public class RideModel {
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public double getFare() {
+        return fare;
+    }
+
+    public void setFare(double fare) {
+        this.fare = fare;
+    }
 }

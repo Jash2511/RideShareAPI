@@ -4,11 +4,14 @@ import com.epicman.rideshare.model.RideModel;
 import com.epicman.rideshare.service.RideService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,7 +22,13 @@ public class UserController {
 	private RideService rideService;
 
 	@GetMapping("/rides")
-	public ResponseEntity<?> getPendingRides(HttpServletRequest request) {
+	public ResponseEntity<?> getPendingRides(
+			HttpServletRequest request,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size,
+			@RequestParam(defaultValue = "fare") String sortBy,
+			@RequestParam(defaultValue = "asc") String direction) {
+
 		String userId = (String) request.getAttribute("userId");
 		String role = (String) request.getAttribute("role");
 
@@ -27,10 +36,10 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You are not a normal user"));
 		}
 
-		List<RideModel> rides = rideService.findRidesByUserId(userId)
-				.stream()
-				.filter(ride -> ride.getStatus().equals("REQUESTED"))
-				.toList();
+		Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(page, size, sort);
+
+		Page<RideModel> rides = rideService.findRidesByUserId(userId, pageable);
 
 		return ResponseEntity.ok(rides);
 	}

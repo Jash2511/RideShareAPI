@@ -6,66 +6,72 @@ import com.epicman.rideshare.exception.ForbiddenException;
 import com.epicman.rideshare.exception.NotFoundException;
 import com.epicman.rideshare.model.RideModel;
 import com.epicman.rideshare.repository.RideRepository;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 @Service
 public class RideService {
 
-    private final RideRepository rideRepository;
+	private final RideRepository rideRepository;
 
-    public RideService(RideRepository rideRepository) {
-        this.rideRepository = rideRepository;
-    }
+	public RideService(RideRepository rideRepository) {
+		this.rideRepository = rideRepository;
+	}
 
-    public RideModel create(String userId, RideRequestDto dto) {
-        RideModel ride = new RideModel();
-        ride.setUserId(userId);
-        ride.setPickupLocation(dto.getPickupLocation());
-        ride.setDropLocation(dto.getDropLocation());
-        ride.setStatus("REQUESTED");
-        ride.setFare(dto.getFare());
+	public RideModel create(String userId, RideRequestDto dto) {
+		RideModel ride = new RideModel();
+		ride.setUserId(userId);
+		ride.setPickupLocation(dto.getPickupLocation());
+		ride.setDropLocation(dto.getDropLocation());
+		ride.setStatus("REQUESTED");
+		ride.setFare(dto.getFare());
 
-        return rideRepository.save(ride);
-    }
+		return rideRepository.save(ride);
+	}
 
-    public List<RideModel> findRidesByUserId(String userId) {
-        return rideRepository.findByUserId(userId);
-    }
+	public Page<RideModel> findRidesByUserId(String userId, Pageable pageable) {
+		return rideRepository.findByUserId(userId, pageable);
+	}
 
-    public List<RideModel> findAllRides() {
-        return rideRepository.findAll();
-    }
+	public Page<RideModel> findAllRides(Pageable pageable) {
+		return rideRepository.findAll(pageable);
+	}
 
-    public RideModel acceptRide(String rideId, String driverId) throws NotFoundException, BadRequestException {
-        RideModel ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new NotFoundException("Ride not found"));
+	public Page<RideModel> findPendingRides(Pageable pageable) {
+		return rideRepository.findByStatus("REQUESTED", pageable);
+	}
 
-        if (!ride.getStatus().equals("REQUESTED")) {
-            throw new BadRequestException("Ride cannot be accepted");
-        }
+	public RideModel acceptRide(String rideId, String driverId) throws NotFoundException, BadRequestException {
+		RideModel ride = rideRepository.findById(rideId)
+				.orElseThrow(() -> new NotFoundException("Ride not found"));
 
-        ride.setStatus("ACCEPTED");
-        ride.setDriverId(driverId);
+		if (!ride.getStatus().equals("REQUESTED")) {
+			throw new BadRequestException("Ride cannot be accepted");
+		}
 
-        return rideRepository.save(ride);
-    }
+		ride.setStatus("ACCEPTED");
+		ride.setDriverId(driverId);
 
-    public RideModel completeRide(String rideId, String driverId) throws ForbiddenException, BadRequestException {
-        RideModel ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new NotFoundException("Ride not found"));
+		return rideRepository.save(ride);
+	}
 
-        if (!ride.getDriverId().equals(driverId)) {
-            throw new ForbiddenException("Not your ride");
-        }
+	public RideModel completeRide(String rideId, String driverId) throws ForbiddenException, BadRequestException {
+		RideModel ride = rideRepository.findById(rideId)
+				.orElseThrow(() -> new NotFoundException("Ride not found"));
 
-        if (!ride.getStatus().equals("ACCEPTED")) {
-            throw new BadRequestException("Ride is not yet accepted");
-        }
+		if (!ride.getDriverId().equals(driverId)) {
+			throw new ForbiddenException("Not your ride");
+		}
 
-        ride.setStatus("COMPLETED");
+		if (!ride.getStatus().equals("ACCEPTED")) {
+			throw new BadRequestException("Ride is not yet accepted");
+		}
 
-        return rideRepository.save(ride);
-    }
+		ride.setStatus("COMPLETED");
+
+		return rideRepository.save(ride);
+	}
+
 }

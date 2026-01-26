@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,9 +29,17 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequestDto userRequestDto) throws Exception {
-        UserModel createdUser = userService.registerUser(userRequestDto.getUsername(), userRequestDto.getPassword(), userRequestDto.getRole());
+    @PostMapping(value = "/register", consumes = "multipart/form-data")
+    public ResponseEntity<?> register(
+            @Valid @ModelAttribute UserRegisterRequestDto userRequestDto,
+            @RequestParam(value = "file", required = false) MultipartFile file)
+            throws Exception {
+
+        UserModel createdUser = userService.registerUser(
+                userRequestDto.getUsername(),
+                userRequestDto.getPassword(),
+                userRequestDto.getRole(),
+                file);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toResponse(createdUser));
     }
@@ -36,11 +47,8 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@Valid @RequestBody UserLoginRequestDto userLoginRequestDto) throws Exception {
         UserModel user = userService.findByUsername(userLoginRequestDto.getUsername());
-
-        if (user == null) {
-            throw new NotFoundException("User could not be found");
-        }
-
+        // UserService now throws NotFoundException if user is missing, no need to check
+        // here
         return jwtUtil.generateToken(user.getUsername(), user.getRole());
     }
 }

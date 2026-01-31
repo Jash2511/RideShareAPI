@@ -47,8 +47,6 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@Valid @RequestBody UserLoginRequestDto userLoginRequestDto) throws Exception {
         UserModel user = userService.findByUsername(userLoginRequestDto.getUsername());
-        // UserService now throws NotFoundException if user is missing, no need to check
-        // here
         return jwtUtil.generateToken(user.getUsername(), user.getRole());
     }
 }

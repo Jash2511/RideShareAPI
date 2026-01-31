@@ -26,32 +26,32 @@ public class JwtFilter extends OncePerRequestFilter {
     private UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String header = request.getHeader("Authorization");
 
         String token = null;
         String username = null;
 
-        if(header != null && header.startsWith("Bearer ")){
+        if (header != null && header.startsWith("Bearer ")) {
             token = header.substring(7);
             username = jwtUtil.extractUsername(token);
 
-            System.out.println("-----------> "+username);
+            System.out.println("-----------> " + username);
         }
 
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             var userDetails = userService.findByUsername(username);
 
-            if(jwtUtil.validateToken(token)) {
+            if (jwtUtil.validateToken(token)) {
 
                 String role = jwtUtil.extractRole(token);
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        List.of(new SimpleGrantedAuthority(role))
-                );
+                        List.of(new SimpleGrantedAuthority(role)));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
@@ -59,6 +59,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 request.setAttribute("role", userDetails.getRole());
             }
         }
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }

@@ -1,6 +1,24 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/rideshare
+    redis:
+      host: localhost
+      port: 6379
+      username:
+      password:
+      ssl:
+        enabled: false
+
 jwt:
   secret: your-jwt-secret
   expiration-ms: 3600000
+
+rideshare:
+  rate-limit:
+    capacity: 10
+    refill-tokens: 10
+    refill-duration-minutes: 1
 
 cloudinary:
   cloud_name: your-cloud-name

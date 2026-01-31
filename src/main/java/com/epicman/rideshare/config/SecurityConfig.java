@@ -28,13 +28,14 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter, RateLimitFilter rateLimitFilter) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter,
+			RateLimitFilter rateLimitFilter) throws Exception {
 		http.csrf(crsf -> crsf.disable()).authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/auth/**").permitAll()
 				.requestMatchers("/").permitAll()
 				// Swagger/OpenAPI endpoints
-				.requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
-				.requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+				.requestMatchers("/swagger-ui/**").permitAll()
+				.requestMatchers("/v3/api-docs/**").permitAll()
 				.requestMatchers("/swagger-resources/**").permitAll()
 				.requestMatchers("/webjars/**").permitAll()
 				.anyRequest().authenticated()

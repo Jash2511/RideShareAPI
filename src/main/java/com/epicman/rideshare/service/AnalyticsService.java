@@ -2,6 +2,7 @@ package com.epicman.rideshare.service;
 
 import com.epicman.rideshare.model.UserModel;
 import org.bson.Document;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
@@ -20,6 +21,7 @@ public class AnalyticsService {
         this.template = template;
     }
 
+    @Cacheable(value = "driver_earnings", key = "#driverId")
     public Double totalEarnings(String driverId) {
         MatchOperation match = match(Criteria.where("driverId").is(driverId));
         GroupOperation group = group().sum("fare").as("total");
@@ -31,4 +33,3 @@ public class AnalyticsService {
         return result != null ? result.getDouble("total") : 0.0;
     }
 }
-

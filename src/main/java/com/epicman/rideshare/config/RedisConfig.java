@@ -13,6 +13,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@org.springframework.cache.annotation.EnableCaching
 public class RedisConfig {
 
     @Bean

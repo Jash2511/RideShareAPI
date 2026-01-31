@@ -10,6 +10,10 @@ import com.epicman.rideshare.repository.RideRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 
 @Service
 public class RideService {
@@ -43,6 +47,13 @@ public class RideService {
 		return rideRepository.findByStatus("REQUESTED", pageable);
 	}
 
+	@Cacheable(value = "rides", key = "#id")
+	public RideModel getRideById(String id) {
+		return rideRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Ride not found"));
+	}
+
+	@CachePut(value = "rides", key = "#result.id")
 	public RideModel acceptRide(String rideId, String driverId) throws NotFoundException, BadRequestException {
 		RideModel ride = rideRepository.findById(rideId)
 				.orElseThrow(() -> new NotFoundException("Ride not found"));
@@ -57,6 +68,8 @@ public class RideService {
 		return rideRepository.save(ride);
 	}
 
+	@Caching(put = { @CachePut(value = "rides", key = "#result.id") }, evict = {
+			@CacheEvict(value = "driver_earnings", key = "#driverId") })
 	public RideModel completeRide(String rideId, String driverId) throws ForbiddenException, BadRequestException {
 		RideModel ride = rideRepository.findById(rideId)
 				.orElseThrow(() -> new NotFoundException("Ride not found"));

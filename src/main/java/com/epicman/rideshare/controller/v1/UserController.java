@@ -14,12 +14,33 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+import com.epicman.rideshare.service.UserService;
+import com.epicman.rideshare.model.UserModel;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController {
 
 	@Autowired
 	private RideService rideService;
+
+	@Autowired
+	private UserService userService;
+
+	@PostMapping(value = "/profile-picture", consumes = "multipart/form-data")
+	public ResponseEntity<?> uploadProfilePicture(
+			HttpServletRequest request,
+			@RequestParam("file") MultipartFile file) throws IOException {
+
+		String userId = (String) request.getAttribute("userId");
+
+		// Assuming 'userId' attribute is set by authentication filter and is the
+		// database ID
+		UserModel updatedUser = userService.updateProfilePicture(userId, file);
+		return ResponseEntity.ok(updatedUser);
+	}
 
 	@GetMapping("/rides")
 	public ResponseEntity<?> getPendingRides(

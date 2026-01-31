@@ -11,6 +11,7 @@ public class UserModel {
     private String username;
     private String passwordHash;
     private String role;
+    private String profilePictureUrl;
 
     public String getId() {
         return id;
@@ -42,5 +43,13 @@ public class UserModel {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
     }
 }
